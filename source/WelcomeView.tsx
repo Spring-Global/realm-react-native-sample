@@ -1,10 +1,10 @@
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import Realm from 'realm';
-import {useApp} from '@realm/react';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {StyleSheet, Text, View, Alert} from 'react-native';
-import {Input, Button} from '@rneui/base';
-import {colors} from './Colors';
+import { useApp } from '@realm/react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StyleSheet, Text, View, Alert } from 'react-native';
+import { Input, Button } from '@rneui/base';
+import { colors } from './Colors';
 
 export function WelcomeView(): React.ReactElement {
   const [email, setEmail] = useState('');
@@ -34,7 +34,7 @@ export function WelcomeView(): React.ReactElement {
   // onPressSignUp() registers the user and then calls signIn to log the user in
   const onPressSignUp = useCallback(async () => {
     try {
-      await app.emailPasswordAuth.registerUser({email, password});
+      await app.emailPasswordAuth.registerUser({ email, password });
       await signIn();
     } catch (error: any) {
       Alert.alert(`Failed to sign up: ${error?.message}`);
@@ -46,14 +46,10 @@ export function WelcomeView(): React.ReactElement {
       <View style={styles.viewWrapper}>
         <Text style={styles.title}>My Sync App</Text>
         <Text style={styles.subtitle}>
-          Please log in or register with a Device Sync user account. This is
-          separate from your Atlas Cloud login.
+          Please log in or register with a Device Sync user account. This is separate from your
+          Atlas Cloud login.
         </Text>
-        <Input
-          placeholder="email"
-          onChangeText={setEmail}
-          autoCapitalize="none"
-        />
+        <Input placeholder="email" onChangeText={setEmail} autoCapitalize="none" />
         <Input
           placeholder="password"
           onChangeText={setPassword}
@@ -83,11 +79,7 @@ export function WelcomeView(): React.ReactElement {
           </>
         ) : (
           <>
-            <Button
-              title="Log In"
-              buttonStyle={styles.mainButton}
-              onPress={onPressSignIn}
-            />
+            <Button title="Log In" buttonStyle={styles.mainButton} onPress={onPressSignIn} />
             <Button
               title="Don't have an account? Create Account"
               type="clear"

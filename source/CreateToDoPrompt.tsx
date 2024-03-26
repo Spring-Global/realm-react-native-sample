@@ -1,14 +1,14 @@
-import React, {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {Text, Input, Button} from '@rneui/base';
-import {colors} from './Colors';
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Text, Input, Button } from '@rneui/base';
+import { colors } from './Colors';
 
 type Props = {
-  onSubmit: ({summary}: {summary: string}) => void;
+  onSubmit: ({ summary }: { summary: string }) => void;
 };
 
 export function CreateToDoPrompt(props: Props): React.ReactElement<Props> {
-  const {onSubmit} = props;
+  const { onSubmit } = props;
   const [summary, setSummary] = useState('');
 
   return (
@@ -20,11 +20,7 @@ export function CreateToDoPrompt(props: Props): React.ReactElement<Props> {
         placeholder="What do you want to do?"
         onChangeText={(text: string) => setSummary(text)}
       />
-      <Button
-        title="Save"
-        buttonStyle={styles.saveButton}
-        onPress={() => onSubmit({summary})}
-      />
+      <Button title="Save" buttonStyle={styles.saveButton} onPress={() => onSubmit({ summary })} />
     </View>
   );
 }

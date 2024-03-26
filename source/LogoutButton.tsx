@@ -1,7 +1,7 @@
-import React, {useCallback} from 'react';
-import {Pressable, Alert, View, Text, StyleSheet} from 'react-native';
-import {useUser} from '@realm/react';
-import {colors} from './Colors';
+import React, { useCallback } from 'react';
+import { Pressable, Alert, View, Text, StyleSheet } from 'react-native';
+import { useUser } from '@realm/react';
+import { colors } from './Colors';
 
 export function LogoutButton() {
   const user = useUser();
@@ -21,7 +21,7 @@ export function LogoutButton() {
             style: 'destructive',
             onPress: () => signOut(),
           },
-          {text: 'Cancel', style: 'cancel'},
+          { text: 'Cancel', style: 'cancel' },
         ]);
       }}>
       <View style={styles.buttonContainer}>

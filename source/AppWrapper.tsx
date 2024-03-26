@@ -1,12 +1,12 @@
 import React from 'react';
-import {StyleSheet, View, ActivityIndicator} from 'react-native';
-import {AppProvider, UserProvider, RealmProvider} from '@realm/react';
-import {appId, baseUrl} from '../atlasConfig.json';
+import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { AppProvider, UserProvider, RealmProvider } from '@realm/react';
+import { appId, baseUrl } from '../atlasConfig.json';
 
-import {App} from './App';
-import {WelcomeView} from './WelcomeView';
+import { App } from './App';
+import { WelcomeView } from './WelcomeView';
 
-import {Item} from './ItemSchema';
+import { Item } from './ItemSchema';
 
 const LoadingIndicator = () => {
   return (

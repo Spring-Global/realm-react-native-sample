@@ -1,15 +1,15 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {BSON} from 'realm';
-import {useUser, useRealm, useQuery} from '@realm/react';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {Alert, FlatList, StyleSheet, Switch, Text, View} from 'react-native';
-import {Button, Overlay, ListItem} from '@rneui/base';
-import {dataExplorerLink} from '../atlasConfig.json';
+import React, { useCallback, useState, useEffect } from 'react';
+import { BSON } from 'realm';
+import { useUser, useRealm, useQuery } from '@realm/react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Alert, FlatList, StyleSheet, Switch, Text, View } from 'react-native';
+import { Button, Overlay, ListItem } from '@rneui/base';
+import { dataExplorerLink } from '../atlasConfig.json';
 
-import {CreateToDoPrompt} from './CreateToDoPrompt';
+import { CreateToDoPrompt } from './CreateToDoPrompt';
 
-import {Item} from './ItemSchema';
-import {colors} from './Colors';
+import { Item } from './ItemSchema';
+import { colors } from './Colors';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -40,24 +40,23 @@ export function ItemListView() {
   // This allows for tracking the state of the toggle switch by the name of the subscription
   useEffect(() => {
     if (showAllItems) {
-      realm.subscriptions.update(mutableSubs => {
+      realm.subscriptions.update((mutableSubs) => {
         mutableSubs.removeByName(ownItemsSubscriptionName);
-        mutableSubs.add(realm.objects(Item), {name: itemSubscriptionName});
+        mutableSubs.add(realm.objects(Item), { name: itemSubscriptionName });
       });
     } else {
-      realm.subscriptions.update(mutableSubs => {
+      realm.subscriptions.update((mutableSubs) => {
         mutableSubs.removeByName(itemSubscriptionName);
-        mutableSubs.add(
-          realm.objects(Item).filtered(`owner_id == "${user?.id}"`),
-          {name: ownItemsSubscriptionName},
-        );
+        mutableSubs.add(realm.objects(Item).filtered(`owner_id == "${user?.id}"`), {
+          name: ownItemsSubscriptionName,
+        });
       });
     }
   }, [realm, user, showAllItems]);
 
   // createItem() takes in a summary and then creates an Item object with that summary
   const createItem = useCallback(
-    ({summary}: {summary: string}) => {
+    ({ summary }: { summary: string }) => {
       // if the realm exists, create an Item
       realm.write(() => {
         console.log(dataExplorerMessage);
@@ -114,7 +113,7 @@ export function ItemListView() {
         <View style={styles.toggleRow}>
           <Text style={styles.toggleText}>Show All Tasks</Text>
           <Switch
-            trackColor={{true: '#00ED64'}}
+            trackColor={{ true: '#00ED64' }}
             onValueChange={() => {
               if (realm.syncSession?.state !== 'active') {
                 Alert.alert(
@@ -131,20 +130,18 @@ export function ItemListView() {
           overlayStyle={styles.overlay}
           onBackdropPress={() => setShowNewItemOverlay(false)}>
           <CreateToDoPrompt
-            onSubmit={({summary}) => {
+            onSubmit={({ summary }) => {
               setShowNewItemOverlay(false);
-              createItem({summary});
+              createItem({ summary });
             }}
           />
         </Overlay>
         <FlatList
-          keyExtractor={item => item._id.toString()}
+          keyExtractor={(item) => item._id.toString()}
           data={items}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <ListItem key={`${item._id}`} bottomDivider topDivider>
-              <ListItem.Title style={styles.itemTitle}>
-                {item.summary}
-              </ListItem.Title>
+              <ListItem.Title style={styles.itemTitle}>{item.summary}</ListItem.Title>
               <ListItem.Subtitle style={styles.itemSubtitle}>
                 <Text>{item.owner_id === user?.id ? '(mine)' : ''}</Text>
               </ListItem.Subtitle>
@@ -156,11 +153,7 @@ export function ItemListView() {
                     onPress={() => toggleItemIsComplete(item._id)}
                   />
                 )}
-                <Button
-                  title="Delete"
-                  type="clear"
-                  onPress={() => deleteItem(item._id)}
-                />
+                <Button title="Delete" type="clear" onPress={() => deleteItem(item._id)} />
               </ListItem.Content>
             </ListItem>
           )}

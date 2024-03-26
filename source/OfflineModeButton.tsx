@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
-import {Pressable, StyleSheet, Text} from 'react-native';
-import {useRealm} from '@realm/react';
-import {colors} from './Colors';
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text } from 'react-native';
+import { useRealm } from '@realm/react';
+import { colors } from './Colors';
 
 export function OfflineModeButton() {
   const realm = useRealm();
