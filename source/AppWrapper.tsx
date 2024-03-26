@@ -7,6 +7,11 @@ import { App } from './App';
 import { WelcomeView } from './WelcomeView';
 
 import { Item } from './ItemSchema';
+import { Region } from './spring/region/region';
+import { Inventory } from './spring/inventory/inventory';
+import { InventoryItem } from './spring/inventory/inventoryItem';
+import { InventoryType } from './spring/inventoryType/inventoryType';
+import { User } from './spring/user/user';
 
 const LoadingIndicator = () => {
   return (
@@ -21,7 +26,7 @@ export const AppWrapper = () => {
     <AppProvider id={appId} baseUrl={baseUrl}>
       <UserProvider fallback={WelcomeView}>
         <RealmProvider
-          schema={[Item]}
+          schema={[Item, Region, Inventory, InventoryItem, InventoryType, User]}
           sync={{
             flexible: true,
             onError: (_session, error) => {
