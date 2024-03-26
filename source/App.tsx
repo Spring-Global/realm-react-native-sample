@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet, Linking, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-
+import Realm from 'realm';
 import { dataExplorerLink } from '../atlasConfig.json';
 import { LogoutButton } from './LogoutButton';
 import { ItemListView } from './ItemListView';
 import { OfflineModeButton } from './OfflineModeButton';
+import { useRealm } from '@realm/react';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -28,6 +29,26 @@ const headerLeft = () => {
 };
 
 export const App = () => {
+  const realm = useRealm();
+  useEffect(() => {
+    const syncSession = realm.syncSession;
+
+    if (syncSession) {
+      const connectionNotificationCallback: Realm.ConnectionNotificationCallback = (
+        newState,
+        oldState,
+      ) => {
+        console.log('connectionNotificationCallback', newState, oldState);
+      };
+
+      syncSession.addConnectionNotification(connectionNotificationCallback);
+
+      return () => {
+        syncSession.removeConnectionNotification(connectionNotificationCallback);
+      };
+    }
+  });
+
   return (
     <>
       {/* All screens nested in RealmProvider have access
