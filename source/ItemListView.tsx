@@ -1,37 +1,22 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { BSON } from 'realm';
-import { useUser, useRealm, useQuery } from '@realm/react';
+import React, { useEffect } from 'react';
+import { useRealm, useQuery } from '@realm/react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Alert, FlatList, StyleSheet, Switch, Text, View } from 'react-native';
-import { Button, Overlay, ListItem } from '@rneui/base';
-import { dataExplorerLink } from '../atlasConfig.json';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { CreateToDoPrompt } from './CreateToDoPrompt';
-
-import { Item } from './ItemSchema';
 import { colors } from './Colors';
+import { Region } from './spring/region/region';
+import { Inventory } from './spring/inventory/inventory';
+import { Switch } from '@rneui/themed';
+import { User } from './spring/user/user';
 
-// If you're getting this app code by cloning the repository at
-// https://github.com/mongodb/ template-app-react-native-todo,
-// it does not contain the data explorer link. Download the
-// app template from the Atlas UI to view a link to your data
-const dataExplorerMessage = `View your data in MongoDB Atlas: ${dataExplorerLink}.`;
-
-const itemSubscriptionName = 'items';
-const ownItemsSubscriptionName = 'ownItems';
+const userHierarchy = '/1/2/83/63/24/';
 
 export function ItemListView() {
+  const [myRegionOnly, setMyRegionOnly] = React.useState(true);
   const realm = useRealm();
-  const items = useQuery(Item).sorted('_id');
-  const user = useUser();
-
-  const [showNewItemOverlay, setShowNewItemOverlay] = useState(false);
-
-  // This state will be used to toggle between showing all items and only showing the current user's items
-  // This is initialized based on which subscription is already active
-  const [showAllItems, setShowAllItems] = useState(
-    !!realm.subscriptions.findByName(itemSubscriptionName),
-  );
+  const regions = useQuery(Region).sorted('_id');
+  const users = useQuery(User);
+  const inventories = useQuery(Inventory).sorted('_id');
 
   // This effect will initialize the subscription to the items collection
   // By default it will filter out all items that do not belong to the current user
@@ -39,130 +24,58 @@ export function ItemListView() {
   // The old subscription will be removed and the new subscription will be added
   // This allows for tracking the state of the toggle switch by the name of the subscription
   useEffect(() => {
-    if (showAllItems) {
-      realm.subscriptions.update((mutableSubs) => {
-        mutableSubs.removeByName(ownItemsSubscriptionName);
-        mutableSubs.add(realm.objects(Item), { name: itemSubscriptionName });
-      });
-    } else {
-      realm.subscriptions.update((mutableSubs) => {
-        mutableSubs.removeByName(itemSubscriptionName);
-        mutableSubs.add(realm.objects(Item).filtered(`owner_id == "${user?.id}"`), {
-          name: ownItemsSubscriptionName,
+    realm.subscriptions.update((mutableSubs) => {
+      mutableSubs.removeAll();
+      if (myRegionOnly) {
+        const regionsQueryable = regions.slice();
+        mutableSubs.add(
+          realm.objects(Region).filtered('idRegionPath BEGINSWITH $0', userHierarchy),
+          {
+            name: 'region',
+          },
+        );
+        mutableSubs.add(realm.objects(Inventory).filtered('region IN $0', regionsQueryable), {
+          name: 'inventories',
         });
-      });
-    }
-  }, [realm, user, showAllItems]);
-
-  // createItem() takes in a summary and then creates an Item object with that summary
-  const createItem = useCallback(
-    ({ summary }: { summary: string }) => {
-      // if the realm exists, create an Item
-      realm.write(() => {
-        console.log(dataExplorerMessage);
-
-        return new Item(realm, {
-          summary,
-          owner_id: user?.id,
+        mutableSubs.add(realm.objects(User).filtered('region IN $0', regionsQueryable), {
+          name: 'users',
         });
-      });
-    },
-    [realm, user],
-  );
-
-  // deleteItem() deletes an Item with a particular _id
-  const deleteItem = useCallback(
-    (id: BSON.ObjectId) => {
-      // if the realm exists, get the Item with a particular _id and delete it
-      const item = realm.objectForPrimaryKey(Item, id); // search for a realm object with a primary key that is an objectId
-      if (item) {
-        if (item.owner_id !== user?.id) {
-          Alert.alert("You can't delete someone else's task!");
-        } else {
-          realm.write(() => {
-            realm.delete(item);
-          });
-          console.log(dataExplorerMessage);
-        }
+      } else {
+        mutableSubs.add(realm.objects(Region), { name: 'regions_full' });
+        mutableSubs.add(realm.objects(Inventory), { name: 'inventories_full' });
+        mutableSubs.add(realm.objects(User), { name: 'users_full' });
       }
-    },
-    [realm, user],
-  );
-  // toggleItemIsComplete() updates an Item with a particular _id to be 'completed'
-  const toggleItemIsComplete = useCallback(
-    (id: BSON.ObjectId) => {
-      // if the realm exists, get the Item with a particular _id and update it's 'isCompleted' field
-      const item = realm.objectForPrimaryKey(Item, id); // search for a realm object with a primary key that is an objectId
-      if (item) {
-        if (item.owner_id !== user?.id) {
-          Alert.alert("You can't modify someone else's task!");
-        } else {
-          realm.write(() => {
-            item.isComplete = !item.isComplete;
-          });
-          console.log(dataExplorerMessage);
-        }
-      }
-    },
-    [realm, user],
-  );
+    });
+  }, [realm, regions, myRegionOnly]);
 
   return (
     <SafeAreaProvider>
+      <View style={styles.toggleRow}>
+        <Text style={styles.toggleText}>My Region Only</Text>
+        <Switch
+          trackColor={{ true: '#00ED64' }}
+          onValueChange={() => {
+            setMyRegionOnly((previous) => !previous);
+          }}
+          value={myRegionOnly}
+        />
+      </View>
       <View style={styles.viewWrapper}>
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleText}>Show All Tasks</Text>
-          <Switch
-            trackColor={{ true: '#00ED64' }}
-            onValueChange={() => {
-              if (realm.syncSession?.state !== 'active') {
-                Alert.alert(
-                  'Switching subscriptions does not affect Realm data when the sync is offline.',
-                );
-              }
-              setShowAllItems(!showAllItems);
-            }}
-            value={showAllItems}
-          />
-        </View>
-        <Overlay
-          isVisible={showNewItemOverlay}
-          overlayStyle={styles.overlay}
-          onBackdropPress={() => setShowNewItemOverlay(false)}>
-          <CreateToDoPrompt
-            onSubmit={({ summary }) => {
-              setShowNewItemOverlay(false);
-              createItem({ summary });
-            }}
-          />
-        </Overlay>
-        <FlatList
+        <Text>Regions: {regions.length}</Text>
+        <Text>Inventories: {inventories.length}</Text>
+        <Text>Users: {users.length}</Text>
+        {/* <FlatList
           keyExtractor={(item) => item._id.toString()}
-          data={items}
+          data={regions}
           renderItem={({ item }) => (
             <ListItem key={`${item._id}`} bottomDivider topDivider>
-              <ListItem.Title style={styles.itemTitle}>{item.summary}</ListItem.Title>
+              <ListItem.Title style={styles.itemTitle}>{item.cdRegion}</ListItem.Title>
               <ListItem.Subtitle style={styles.itemSubtitle}>
-                <Text>{item.owner_id === user?.id ? '(mine)' : ''}</Text>
+                <Text>{item.dsRegion}</Text>
               </ListItem.Subtitle>
-              <ListItem.Content>
-                {!item.isComplete && (
-                  <Button
-                    title="Mark done"
-                    type="clear"
-                    onPress={() => toggleItemIsComplete(item._id)}
-                  />
-                )}
-                <Button title="Delete" type="clear" onPress={() => deleteItem(item._id)} />
-              </ListItem.Content>
             </ListItem>
           )}
-        />
-        <Button
-          title="Add To-Do"
-          buttonStyle={styles.addToDoButton}
-          onPress={() => setShowNewItemOverlay(true)}
-        />
+        /> */}
       </View>
     </SafeAreaProvider>
   );

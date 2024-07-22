@@ -1,7 +1,6 @@
 import Realm, { ObjectSchema } from 'realm';
-
-import { InventoryItem } from './inventoryItem';
 import { Region } from '../region/region';
+import { InventoryItem } from './inventoryItem';
 import { InventoryType } from '../inventoryType/inventoryType';
 
 export class Inventory extends Realm.Object<
@@ -67,7 +66,7 @@ export class Inventory extends Realm.Object<
       idInventory: 'int?',
       cdInventory: 'string',
       nmInventory: 'string',
-      flTracked: { type: 'bool', default: () => true },
+      flTracked: { type: 'bool', default: true },
       region: {
         type: 'object',
         objectType: 'Region',
@@ -76,9 +75,7 @@ export class Inventory extends Realm.Object<
       items: {
         type: 'list',
         objectType: 'InventoryItem',
-        default: () => {
-          return [];
-        },
+        default: [],
       },
       inventoryType: {
         type: 'object',

@@ -1,17 +1,6 @@
 import Realm, { ObjectSchema } from 'realm';
 
-export class InventoryItem extends Realm.Object<
-  InventoryItem,
-  | '_id'
-  | 'idProduct'
-  | 'idPrimaryUnit'
-  | 'nrPrimarySellableQty'
-  | 'nrPrimaryReservedQty'
-  | 'nrPrimaryNonSellableQty'
-  | 'nrSecondarySellableQty'
-  | 'nrSecondaryReservedQty'
-  | 'nrSecondaryNonSellableQty'
-> {
+export class InventoryItem extends Realm.Object<InventoryItem, 'idProduct' | 'idPrimaryUnit'> {
   /**
    * Internal id of inventory item.
    */
@@ -38,32 +27,32 @@ export class InventoryItem extends Realm.Object<
   /**
    * Primary sellable quantity available for the product in the inventory.
    */
-  nrPrimarySellableQty: Realm.Types.Double;
+  nrPrimarySellableQty: Realm.Types.Counter;
 
   /**
    * Primary reserved quantity for the product in the inventory.
    */
-  nrPrimaryReservedQty: Realm.Types.Double;
+  nrPrimaryReservedQty: Realm.Types.Counter;
 
   /**
    * Primary non-selable quantity available for the product in the inventory.
    */
-  nrPrimaryNonSellableQty: Realm.Types.Double;
+  nrPrimaryNonSellableQty: Realm.Types.Counter;
 
   /**
    * Secondary sellable quantity available for the product in the inventory.
    */
-  nrSecondarySellableQty: Realm.Types.Double;
+  nrSecondarySellableQty: Realm.Types.Counter;
 
   /**
    * Secondary reserved quantity for the product in the inventory.
    */
-  nrSecondaryReservedQty: Realm.Types.Double;
+  nrSecondaryReservedQty: Realm.Types.Counter;
 
   /**
    * Secondary non-selable quantity available for the product in the inventory.
    */
-  nrSecondaryNonSellableQty: Realm.Types.Double;
+  nrSecondaryNonSellableQty: Realm.Types.Counter;
 
   /**
    * Extension field.
@@ -90,6 +79,9 @@ export class InventoryItem extends Realm.Object<
    */
   Flexi5?: Realm.Types.String | null;
 
+  /**
+   * Object schema.
+   */
   static schema: ObjectSchema = {
     name: 'InventoryItem',
     embedded: true,
@@ -98,12 +90,12 @@ export class InventoryItem extends Realm.Object<
       idProduct: 'int',
       idPrimaryUnit: 'int',
       idSecondaryUnit: 'int?',
-      nrPrimarySellableQty: 'double',
-      nrPrimaryReservedQty: 'double',
-      nrPrimaryNonSellableQty: 'double',
-      nrSecondarySellableQty: 'double',
-      nrSecondaryReservedQty: 'double',
-      nrSecondaryNonSellableQty: 'double',
+      nrPrimarySellableQty: 'counter',
+      nrPrimaryReservedQty: 'counter',
+      nrPrimaryNonSellableQty: 'counter',
+      nrSecondarySellableQty: 'counter',
+      nrSecondaryReservedQty: 'counter',
+      nrSecondaryNonSellableQty: 'counter',
       Flexi1: 'string?',
       Flexi2: 'string?',
       Flexi3: 'string?',

@@ -1,18 +1,12 @@
 import Realm, { ObjectSchema } from 'realm';
 
-export class InventoryType extends Realm.Object<
-  InventoryType,
-  '_id' | 'cdInventoryType' | 'nmInventoryType'
-> {
-  /**
-   * Internal id of the inventory type.
-   */
-  _id: Realm.Types.ObjectId;
+const inventoryTypeCodeToNumber = new Map<string, number>();
 
+export class InventoryType extends Realm.Object<InventoryType, '_id' | 'nmInventoryType'> {
   /**
-   * Integration code of the inventory type.
+   * Integration code of the inventory type and unique identifier.
    */
-  cdInventoryType: Realm.Types.String;
+  _id: Realm.Types.String;
 
   /**
    * Name of the inventory type.
@@ -44,12 +38,18 @@ export class InventoryType extends Realm.Object<
    */
   Flexi3?: Realm.Types.String | null;
 
+  get idInventoryType() {
+    if (!inventoryTypeCodeToNumber.has(this._id)) {
+      inventoryTypeCodeToNumber.set(this._id, inventoryTypeCodeToNumber.size + 1);
+    }
+    return inventoryTypeCodeToNumber.get(this._id)!;
+  }
+
   static schema: ObjectSchema = {
     name: 'InventoryType',
     primaryKey: '_id',
     properties: {
-      _id: { type: 'objectId', default: () => new Realm.BSON.ObjectId() },
-      cdInventoryType: 'string',
+      _id: 'string',
       nmInventoryType: 'string',
       dsInventoryType: 'string?',
       behaviors: {
