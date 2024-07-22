@@ -22,7 +22,7 @@ const ownItemsSubscriptionName = 'ownItems';
 
 export function ItemListView() {
   const realm = useRealm();
-  const items = useQuery(Item).sorted('_id');
+  const items = useQuery(Item).filtered(`ownerId == '1'`);
   const user = useUser();
 
   const [showNewItemOverlay, setShowNewItemOverlay] = useState(false);
@@ -63,7 +63,7 @@ export function ItemListView() {
 
         return new Item(realm, {
           summary,
-          owner_id: user?.id,
+          ownerId: user?.id,
         });
       });
     },
@@ -76,7 +76,7 @@ export function ItemListView() {
       // if the realm exists, get the Item with a particular _id and delete it
       const item = realm.objectForPrimaryKey(Item, id); // search for a realm object with a primary key that is an objectId
       if (item) {
-        if (item.owner_id !== user?.id) {
+        if (item.ownerId !== user?.id) {
           Alert.alert("You can't delete someone else's task!");
         } else {
           realm.write(() => {
@@ -94,7 +94,7 @@ export function ItemListView() {
       // if the realm exists, get the Item with a particular _id and update it's 'isCompleted' field
       const item = realm.objectForPrimaryKey(Item, id); // search for a realm object with a primary key that is an objectId
       if (item) {
-        if (item.owner_id !== user?.id) {
+        if (item.ownerId !== user?.id) {
           Alert.alert("You can't modify someone else's task!");
         } else {
           realm.write(() => {
@@ -143,7 +143,7 @@ export function ItemListView() {
             <ListItem key={`${item._id}`} bottomDivider topDivider>
               <ListItem.Title style={styles.itemTitle}>{item.summary}</ListItem.Title>
               <ListItem.Subtitle style={styles.itemSubtitle}>
-                <Text>{item.owner_id === user?.id ? '(mine)' : ''}</Text>
+                <Text>{item.ownerId === user?.id ? '(mine)' : ''}</Text>
               </ListItem.Subtitle>
               <ListItem.Content>
                 {!item.isComplete && (

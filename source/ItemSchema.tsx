@@ -4,7 +4,7 @@ export class Item extends Realm.Object<Item> {
   _id!: BSON.ObjectId;
   isComplete!: boolean;
   summary!: string;
-  owner_id!: string;
+  ownerId!: string;
 
   static schema: Realm.ObjectSchema = {
     name: 'Item',
@@ -15,7 +15,10 @@ export class Item extends Realm.Object<Item> {
       // All todo items will default to incomplete
       isComplete: { type: 'bool', default: false },
       summary: 'string',
-      owner_id: 'string',
+      ownerId: {
+        type: 'string',
+        mapTo: 'owner_id',
+      },
     },
   };
 }
