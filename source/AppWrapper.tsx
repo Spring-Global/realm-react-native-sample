@@ -12,6 +12,7 @@ import { Inventory } from './spring/inventory/inventory';
 import { InventoryItem } from './spring/inventory/inventoryItem';
 import { InventoryType } from './spring/inventoryType/inventoryType';
 import { User } from './spring/user/user';
+import Realm from 'realm';
 
 const LoadingIndicator = () => {
   return (
@@ -22,6 +23,13 @@ const LoadingIndicator = () => {
 };
 
 export const AppWrapper = () => {
+  Realm.setLogLevel('all');
+
+  // Set logger to log in cmException as a trace with source "Realm".
+  Realm.setLogger((entry) => {
+    // console.log(entry);
+  });
+
   return (
     <AppProvider id={appId} baseUrl={baseUrl}>
       <UserProvider fallback={WelcomeView}>
