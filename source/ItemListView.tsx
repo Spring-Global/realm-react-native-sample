@@ -61,10 +61,21 @@ export function ItemListView() {
       realm.write(() => {
         console.log(dataExplorerMessage);
 
-        return new Item(realm, {
+        const item = new Item(realm, {
           summary,
           owner_id: user?.id,
         });
+
+        item.itemEmbeddedList.push({
+          summary: 'Embedded Item',
+        });
+        item.itemEmbeddedList.push({
+          summary: 'To Be Replace',
+        });
+
+        item.itemEmbeddedList.at(-1)!.summary = 'Replaced';
+
+        return item;
       });
     },
     [realm, user],
@@ -142,6 +153,9 @@ export function ItemListView() {
           renderItem={({ item }) => (
             <ListItem key={`${item._id}`} bottomDivider topDivider>
               <ListItem.Title style={styles.itemTitle}>{item.summary}</ListItem.Title>
+              <ListItem.Title style={styles.itemTitle}>
+                {item.itemEmbeddedList.map((i) => i.summary).join('\r\n')}
+              </ListItem.Title>
               <ListItem.Subtitle style={styles.itemSubtitle}>
                 <Text>{item.owner_id === user?.id ? '(mine)' : ''}</Text>
               </ListItem.Subtitle>
