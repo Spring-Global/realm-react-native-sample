@@ -6,7 +6,7 @@ import { appId, baseUrl } from '../atlasConfig.json';
 import { App } from './App';
 import { WelcomeView } from './WelcomeView';
 
-import { Item, ItemEmbedded } from './ItemSchema';
+import { Item, ItemEmbedded, ItemEmbeddedReview } from './ItemSchema';
 import { Region } from './spring/region/region';
 import { Inventory } from './spring/inventory/inventory';
 import { InventoryItem } from './spring/inventory/inventoryItem';
@@ -26,7 +26,16 @@ export const AppWrapper = () => {
     <AppProvider id={appId} baseUrl={baseUrl}>
       <UserProvider fallback={WelcomeView}>
         <RealmProvider
-          schema={[Item, ItemEmbedded, Region, Inventory, InventoryItem, InventoryType, User]}
+          schema={[
+            Item,
+            ItemEmbedded,
+            ItemEmbeddedReview,
+            Region,
+            Inventory,
+            InventoryItem,
+            InventoryType,
+            User,
+          ]}
           sync={{
             flexible: true,
             onError: (_session, error) => {

@@ -1,15 +1,16 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { BSON } from 'realm';
 import { useUser, useRealm, useQuery } from '@realm/react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Alert, FlatList, StyleSheet, Switch, Text, View } from 'react-native';
-import { Button, Overlay, ListItem } from '@rneui/base';
+import { Button, Overlay } from '@rneui/base';
 import { dataExplorerLink } from '../atlasConfig.json';
 
 import { CreateToDoPrompt } from './CreateToDoPrompt';
 
 import { Item } from './ItemSchema';
 import { colors } from './Colors';
+import { ItemListViewItem } from './ItemListViewItem';
+import { SampleContext } from './SampleContext';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -19,6 +20,8 @@ const dataExplorerMessage = `View your data in MongoDB Atlas: ${dataExplorerLink
 
 const itemSubscriptionName = 'items';
 const ownItemsSubscriptionName = 'ownItems';
+
+let renderTimes = 0;
 
 export function ItemListView() {
   const realm = useRealm();
@@ -73,111 +76,54 @@ export function ItemListView() {
           summary: 'To Be Replace',
         });
 
-        item.itemEmbeddedList.at(-1)!.summary = 'Replaced';
-
         return item;
       });
     },
     [realm, user],
   );
 
-  // deleteItem() deletes an Item with a particular _id
-  const deleteItem = useCallback(
-    (id: BSON.ObjectId) => {
-      // if the realm exists, get the Item with a particular _id and delete it
-      const item = realm.objectForPrimaryKey(Item, id); // search for a realm object with a primary key that is an objectId
-      if (item) {
-        if (item.owner_id !== user?.id) {
-          Alert.alert("You can't delete someone else's task!");
-        } else {
-          realm.write(() => {
-            realm.delete(item);
-          });
-          console.log(dataExplorerMessage);
-        }
-      }
-    },
-    [realm, user],
-  );
-  // toggleItemIsComplete() updates an Item with a particular _id to be 'completed'
-  const toggleItemIsComplete = useCallback(
-    (id: BSON.ObjectId) => {
-      // if the realm exists, get the Item with a particular _id and update it's 'isCompleted' field
-      const item = realm.objectForPrimaryKey(Item, id); // search for a realm object with a primary key that is an objectId
-      if (item) {
-        if (item.owner_id !== user?.id) {
-          Alert.alert("You can't modify someone else's task!");
-        } else {
-          realm.write(() => {
-            item.isComplete = !item.isComplete;
-          });
-          console.log(dataExplorerMessage);
-        }
-      }
-    },
-    [realm, user],
-  );
-
   return (
     <SafeAreaProvider>
-      <View style={styles.viewWrapper}>
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleText}>Show All Tasks</Text>
-          <Switch
-            trackColor={{ true: '#00ED64' }}
-            onValueChange={() => {
-              if (realm.syncSession?.state !== 'active') {
-                Alert.alert(
-                  'Switching subscriptions does not affect Realm data when the sync is offline.',
-                );
-              }
-              setShowAllItems(!showAllItems);
-            }}
-            value={showAllItems}
+      <SampleContext.Provider value={{ renderTimes: renderTimes++ }}>
+        <View style={styles.viewWrapper}>
+          <View style={styles.toggleRow}>
+            <Text style={styles.toggleText}>Show All Tasks</Text>
+            <Switch
+              trackColor={{ true: '#00ED64' }}
+              onValueChange={() => {
+                if (realm.syncSession?.state !== 'active') {
+                  Alert.alert(
+                    'Switching subscriptions does not affect Realm data when the sync is offline.',
+                  );
+                }
+                setShowAllItems(!showAllItems);
+              }}
+              value={showAllItems}
+            />
+          </View>
+          <Overlay
+            isVisible={showNewItemOverlay}
+            overlayStyle={styles.overlay}
+            onBackdropPress={() => setShowNewItemOverlay(false)}>
+            <CreateToDoPrompt
+              onSubmit={({ summary }) => {
+                setShowNewItemOverlay(false);
+                createItem({ summary });
+              }}
+            />
+          </Overlay>
+          <FlatList
+            keyExtractor={(item) => item._id.toString()}
+            data={items}
+            renderItem={({ item }) => <ItemListViewItem item={item} />}
+          />
+          <Button
+            title="Add To-Do"
+            buttonStyle={styles.addToDoButton}
+            onPress={() => setShowNewItemOverlay(true)}
           />
         </View>
-        <Overlay
-          isVisible={showNewItemOverlay}
-          overlayStyle={styles.overlay}
-          onBackdropPress={() => setShowNewItemOverlay(false)}>
-          <CreateToDoPrompt
-            onSubmit={({ summary }) => {
-              setShowNewItemOverlay(false);
-              createItem({ summary });
-            }}
-          />
-        </Overlay>
-        <FlatList
-          keyExtractor={(item) => item._id.toString()}
-          data={items}
-          renderItem={({ item }) => (
-            <ListItem key={`${item._id}`} bottomDivider topDivider>
-              <ListItem.Title style={styles.itemTitle}>{item.summary}</ListItem.Title>
-              <ListItem.Title style={styles.itemTitle}>
-                {item.itemEmbeddedList.map((i) => i.summary).join('\r\n')}
-              </ListItem.Title>
-              <ListItem.Subtitle style={styles.itemSubtitle}>
-                <Text>{item.owner_id === user?.id ? '(mine)' : ''}</Text>
-              </ListItem.Subtitle>
-              <ListItem.Content>
-                {!item.isComplete && (
-                  <Button
-                    title="Mark done"
-                    type="clear"
-                    onPress={() => toggleItemIsComplete(item._id)}
-                  />
-                )}
-                <Button title="Delete" type="clear" onPress={() => deleteItem(item._id)} />
-              </ListItem.Content>
-            </ListItem>
-          )}
-        />
-        <Button
-          title="Add To-Do"
-          buttonStyle={styles.addToDoButton}
-          onPress={() => setShowNewItemOverlay(true)}
-        />
-      </View>
+      </SampleContext.Provider>
     </SafeAreaProvider>
   );
 }

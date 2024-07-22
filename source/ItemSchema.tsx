@@ -1,25 +1,27 @@
 import Realm, { BSON } from 'realm';
 
+export class ItemEmbeddedReview extends Realm.Object<ItemEmbedded> {
+  value: string;
+
+  static schema: Realm.ObjectSchema = {
+    name: 'ItemEmbeddedReview',
+    embedded: true,
+    properties: {
+      value: 'string?',
+    },
+  };
+}
+
 export class ItemEmbedded extends Realm.Object<ItemEmbedded> {
-  private _summary: string;
-
-  get summary() {
-    return `Get - ${this._summary}`;
-  }
-
-  set summary(value: string) {
-    this._summary = `Setter - ${value}`;
-  }
+  summary: string;
+  review: ItemEmbeddedReview | null;
 
   static schema: Realm.ObjectSchema = {
     name: 'ItemEmbedded',
     embedded: true,
     properties: {
-      _summary: {
-        type: 'string',
-        mapTo: 'summary',
-        optional: true,
-      },
+      summary: 'string?',
+      review: 'ItemEmbeddedReview?',
     },
   };
 }
