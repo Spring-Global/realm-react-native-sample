@@ -6,6 +6,8 @@ export class Item extends Realm.Object<Item> {
   summary!: string;
   owner_id!: string;
 
+  myVariableNotInMongo: string;
+
   static schema: Realm.ObjectSchema = {
     name: 'Item',
     primaryKey: '_id',

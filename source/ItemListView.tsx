@@ -110,6 +110,20 @@ export function ItemListView() {
   return (
     <SafeAreaProvider>
       <View style={styles.viewWrapper}>
+        <Button
+          title="Test"
+          buttonStyle={styles.addToDoButton}
+          onPress={() => {
+            const item0 = items.at(0);
+            item0!.myVariableNotInMongo = "I'm not being saved to realm";
+            const item1 = items.at(0);
+            console.log('item0', item0?.myVariableNotInMongo);
+            console.log('item1', item1?.myVariableNotInMongo);
+
+            // console.log(item === item);
+            // console.log(items.at(0) === items.at(0));
+          }}
+        />
         <View style={styles.toggleRow}>
           <Text style={styles.toggleText}>Show All Tasks</Text>
           <Switch
